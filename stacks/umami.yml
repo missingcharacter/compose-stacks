@@ -1,0 +1,57 @@
+---
+version: '3'
+services:
+  traefik:
+    image: traefik:v2.9
+    container_name: "traefik"
+    command:
+      #- "--log.level=DEBUG"
+      - "--api.insecure=true"
+      - "--providers.docker=true"
+      - "--providers.docker.exposedbydefault=false"
+      - "--entrypoints.websecure.address=:443"
+      - "--entrypoints.web.address=:80"
+      - "--entrypoints.web.http.redirections.entryPoint.to=websecure"
+      - "--entrypoints.web.http.redirections.entryPoint.scheme=https"
+      - "--entrypoints.web.http.redirections.entrypoint.permanent=true"
+      - "--certificatesresolvers.myresolver.acme.tlschallenge=true"
+      #- "--certificatesresolvers.myresolver.acme.caserver=https://acme-staging-v02.api.letsencrypt.org/directory"
+      - "--certificatesresolvers.myresolver.acme.email=<Your Email>"
+      - "--certificatesresolvers.myresolver.acme.storage=/letsencrypt/acme.json"
+    ports:
+      - 443:443
+      - 80:80
+      - 8080:8080
+    volumes:
+      - letsencrypt:/letsencrypt
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    restart: always
+  umami:
+    image: ghcr.io/umami-software/umami:postgresql-v1.39.5
+    container_name: "umami"
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.whoami.rule=Host(`umami.<Your Domain>`)"
+      - "traefik.http.routers.whoami.entrypoints=websecure"
+      - "traefik.http.routers.whoami.tls.certresolver=myresolver"
+    environment:
+      DATABASE_URL: postgresql://umami:<DB Password>@db:5432/umami
+      DATABASE_TYPE: postgresql
+      HASH_SALT: <Replace me with a random string>
+    depends_on:
+      - db
+    restart: always
+    init: true
+  db:
+    image: postgres:15.1-alpine
+    environment:
+      POSTGRES_DB: umami
+      POSTGRES_USER: umami
+      POSTGRES_PASSWORD: <DB Password>
+    volumes:
+      #- <https://github.com/umami-software/umami/blob/master/sql/schema.postgresql.sql>:/docker-entrypoint-initdb.d/schema.postgresql.sql:ro
+      - umami-db-data:/var/lib/postgresql/data
+    restart: always
+volumes:
+  umami-db-data:
+  letsencrypt:
