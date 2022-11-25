@@ -16,4 +16,4 @@ See [docker-compose.md](./docker-compose.md)
 
 See [stacks](./stacks)
 
-Inspired by [thecube/compose-stacks](https://github.com/thecubed/compose-stacks)
+Inspired by [thecubed/compose-stacks](https://github.com/thecubed/compose-stacks)
