@@ -1,0 +1,112 @@
+---
+version: "3"
+
+services:
+  traefik:
+    image: traefik:v2.10.1
+    container_name: traefik
+    command:
+      #- "--log.level=DEBUG"
+      - "--providers.docker=true"
+      - "--providers.docker.exposedByDefault=false"
+      - "--entrypoints.web.address=:80"
+      - "--entrypoints.websecure.address=:443"
+      - "--certificatesresolvers.myresolver.acme.tlschallenge=true"
+      #- "--certificatesresolvers.myresolver.acme.caserver=https://acme-staging-v02.api.letsencrypt.org/directory"
+      - "--certificatesresolvers.myresolver.acme.email=you@domain.tld"
+      - "--certificatesresolvers.myresolver.acme.storage=acme.json"
+      - "--certificatesresolvers.myresolver.acme.storage=/letsencrypt/acme.json"
+    restart: unless-stopped
+    ports:
+      - 80:80
+      - 443:443
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - /opt/docker/vaultwarden/le:/letsencrypt
+
+  waf:
+    image: owasp/modsecurity-crs:3.3.4-apache-202304160904
+    container_name: waf
+    environment:
+      PARANOIA: 1
+      ANOMALY_INBOUND: 10
+      ANOMALY_OUTBOUND: 5
+      PROXY: 1
+      REMOTEIP_INT_PROXY: "172.20.0.1/16"
+      BACKEND: "http://vaultwarden:80"
+      BACKEND_WS: "ws://vaultwarden:80/notifications/hub"
+      PROXY_ERROR_OVERRIDE: "off"
+    volumes:
+     - /opt/docker/vaultwarden/waf/log:/var/log/waf
+     - /opt/docker/vaultwarden/waf-rules/REQUEST-900-EXCLUSION-RULES-BEFORE-CRS.conf:/etc/modsecurity.d/owasp-crs/rules/REQUEST-900-EXCLUSION-RULES-BEFORE-CRS.conf
+     - /opt/docker/vaultwarden/waf-rules/RESPONSE-999-EXCLUSION-RULES-AFTER-CRS.conf:/etc/modsecurity.d/owasp-crs/rules/RESPONSE-999-EXCLUSION-RULES-AFTER-CRS.conf
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.middlewares.redirect-https.redirectScheme.scheme=https"
+      - "traefik.http.middlewares.redirect-https.redirectScheme.permanent=true"
+      - "traefik.http.routers.vw-ui-https.rule=Host(`sub.domain.tld`)"
+      - "traefik.http.routers.vw-ui-https.entrypoints=websecure"
+      - "traefik.http.routers.vw-ui-https.tls=true"
+      - "traefik.http.routers.vw-ui-https.tls.certresolver=myresolver"
+      - "traefik.http.routers.vw-ui-https.service=vw-ui"
+      - "traefik.http.routers.vw-ui-http.rule=Host(`sub.domain.tld`)"
+      - "traefik.http.routers.vw-ui-http.entrypoints=web"
+      - "traefik.http.routers.vw-ui-http.middlewares=redirect-https"
+      - "traefik.http.routers.vw-ui-http.service=vw-ui"
+      - "traefik.http.services.vw-ui.loadbalancer.server.port=80"
+      - "traefik.http.routers.vw-websocket-https.rule=Host(`sub.domain.tld`) && Path(`/notifications/hub`)"
+      - "traefik.http.routers.vw-websocket-https.entrypoints=websecure"
+      - "traefik.http.routers.vw-websocket-https.tls=true"
+      - "traefik.http.routers.vw-websocket-https.tls.certresolver=myresolver"
+      - "traefik.http.routers.vw-websocket-https.service=vw-websocket"
+      - "traefik.http.routers.vw-websocket-http.rule=Host(`sub.domain.tld`) && Path(`/notifications/hub`)"
+      - "traefik.http.routers.vw-websocket-http.entrypoints=web"
+      - "traefik.http.routers.vw-websocket-http.middlewares=redirect-https"
+      - "traefik.http.routers.vw-websocket-http.service=vw-websocket"
+      - "traefik.http.services.vw-websocket.loadbalancer.server.port=3012"
+
+  vaultwarden:
+    image: vaultwarden/server:1.28.1-alpine
+    container_name: vaultwarden
+    restart: unless-stopped
+    environment:
+      WEBSOCKET_ENABLED: "true"
+      SENDS_ALLOWED: "true"
+      PASSWORD_ITERATIONS: 500000
+      SIGNUPS_ALLOWED: "false"
+      SIGNUPS_VERIFY: "true"
+      SIGNUPS_DOMAINS_WHITELIST: "domain.tld"
+      ADMIN_TOKEN: "SUPERSECUREHERE" # generate with `echo -n "$(openssl rand -base64 48) | argon2 "$(openssl rand -base64 32)" -e -id -k 19456 -t 2 -p 1 | sed 's#\$#\$\$#g'`
+      DATABASE_URL: "postgresql://vaultwarden:DB_PASSWORD@vaultwarden-db:5432/vaultwarden" # pragma: allowlist secret
+      DOMAIN: "https://sub.domain.tld"
+      SMTP_HOST: "smtp server"
+      SMTP_FROM: "sender email e.g: you@domain.tld"
+      SMTP_FROM_NAME: "sender name"
+      SMTP_SECURITY: "starttls"
+      SMTP_PORT: 587
+      SMTP_USERNAME: "smtp username"
+      SMTP_PASSWORD: "smtp password" # pragma: allowlist secret
+      LOG_LEVEL: "warn"
+      EXTENDED_LOGGING: "true"
+      TZ: "Etc/UTC"
+    volumes:
+      - /opt/docker/vaultwarden/data:/data
+
+  vaultwarden-db:
+    image: postgres:15.2-alpine
+    container_name: vaultwarden-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: vaultwarden
+      POSTGRES_USER: vaultwarden
+      POSTGRES_PASSWORD: DB_PASSWORD # pragma: allowlist secret
+    volumes:
+      - /opt/docker/vaultwarden/db/data:/var/lib/postgresql/data
+
+networks:
+  default:
+    driver: bridge
+    ipam:
+      driver: default
+      config:
+      - subnet: 172.20.0.1/16
