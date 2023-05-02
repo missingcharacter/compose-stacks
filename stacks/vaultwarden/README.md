@@ -10,6 +10,25 @@ Mostly based on:
 
 - [`fail2ban`](https://github.com/fail2ban/fail2ban)
 
+## How to generate `ADMIN_TOKEN`
+
+```shell
+$ openssl rand -base64 48 # this will generate the plain text token
+<REDACTED>
+```
+
+### How to secure the `ADMIN_TOKEN`
+
+The command below will generate the string to enter as environment variables
+`ADMIN_TOKEN`
+
+```shell
+$ echo -n '<REDACTED>' | argon2 \
+  "$(openssl rand -base64 32)" -e -id -k 19456 -t 2 -p 1 | sed 's#\$#\$\$#g'
+```
+
+More details [here](https://github.com/dani-garcia/vaultwarden/wiki/Enabling-admin-page#secure-the-admin_token)
+
 ## `fail2ban` setup
 
 The documented `fail2ban` configuration for `vaultwarden` is

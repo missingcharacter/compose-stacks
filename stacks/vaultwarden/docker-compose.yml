@@ -76,7 +76,7 @@ services:
       SIGNUPS_ALLOWED: "false"
       SIGNUPS_VERIFY: "true"
       SIGNUPS_DOMAINS_WHITELIST: "domain.tld"
-      ADMIN_TOKEN: "SUPERSECUREHERE" # generate with `echo -n "$(openssl rand -base64 48) | argon2 "$(openssl rand -base64 32)" -e -id -k 19456 -t 2 -p 1 | sed 's#\$#\$\$#g'`
+      ADMIN_TOKEN: "SUPERSECUREHERE" # See `README.md`
       DATABASE_URL: "postgresql://vaultwarden:DB_PASSWORD@vaultwarden-db:5432/vaultwarden" # pragma: allowlist secret
       DOMAIN: "https://sub.domain.tld"
       SMTP_HOST: "smtp server"
