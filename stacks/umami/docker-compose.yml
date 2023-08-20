@@ -27,7 +27,7 @@ services:
       - /var/run/docker.sock:/var/run/docker.sock:ro
     restart: always
   umami:
-    image: ghcr.io/umami-software/umami:postgresql-v2.2.0
+    image: ghcr.io/umami-software/umami:postgresql-v2.5.0
     container_name: "umami"
     labels:
       - "traefik.enable=true"
@@ -43,7 +43,7 @@ services:
     restart: always
     init: true
   db:
-    image: postgres:15.1-alpine
+    image: postgres:15.4-alpine3.18
     environment:
       POSTGRES_DB: umami
       POSTGRES_USER: umami
