@@ -1,10 +1,11 @@
+---
 name: Run pre-commit
-
 on:
   push:
-    branches: [ develop, main ]
+    branches:
+      - develop
+      - main
   pull_request:
-
 jobs:
   pre-commit:
     name: Run pre-commit
@@ -22,4 +23,4 @@ jobs:
           echo "Python version is $(python -V)"
           pip install --upgrade detect-secrets
       - name: Run pre-commit
-        uses: pre-commit/action@v2.0.3
+        uses: pre-commit/action@v3.0.0

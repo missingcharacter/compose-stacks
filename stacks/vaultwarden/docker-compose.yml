@@ -1,6 +1,5 @@
 ---
 version: "3"
-
 services:
   traefik:
     image: traefik:v2.10.4
@@ -23,7 +22,6 @@ services:
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock:ro
       - /opt/docker/vaultwarden/le:/letsencrypt
-
   waf:
     image: owasp/modsecurity-crs:3.3.5-apache-202308071108
     container_name: waf
@@ -37,9 +35,9 @@ services:
       BACKEND_WS: "ws://vaultwarden:80/notifications/hub"
       PROXY_ERROR_OVERRIDE: "off"
     volumes:
-     - /opt/docker/vaultwarden/waf/log:/var/log/waf
-     - /opt/docker/vaultwarden/waf-rules/REQUEST-900-EXCLUSION-RULES-BEFORE-CRS.conf:/etc/modsecurity.d/owasp-crs/rules/REQUEST-900-EXCLUSION-RULES-BEFORE-CRS.conf
-     - /opt/docker/vaultwarden/waf-rules/RESPONSE-999-EXCLUSION-RULES-AFTER-CRS.conf:/etc/modsecurity.d/owasp-crs/rules/RESPONSE-999-EXCLUSION-RULES-AFTER-CRS.conf
+      - /opt/docker/vaultwarden/waf/log:/var/log/waf
+      - /opt/docker/vaultwarden/waf-rules/REQUEST-900-EXCLUSION-RULES-BEFORE-CRS.conf:/etc/modsecurity.d/owasp-crs/rules/REQUEST-900-EXCLUSION-RULES-BEFORE-CRS.conf
+      - /opt/docker/vaultwarden/waf-rules/RESPONSE-999-EXCLUSION-RULES-AFTER-CRS.conf:/etc/modsecurity.d/owasp-crs/rules/RESPONSE-999-EXCLUSION-RULES-AFTER-CRS.conf
     labels:
       - "traefik.enable=true"
       - "traefik.http.middlewares.redirect-https.redirectScheme.scheme=https"
@@ -64,7 +62,6 @@ services:
       - "traefik.http.routers.vw-websocket-http.middlewares=redirect-https"
       - "traefik.http.routers.vw-websocket-http.service=vw-websocket"
       - "traefik.http.services.vw-websocket.loadbalancer.server.port=3012"
-
   vaultwarden:
     image: vaultwarden/server:1.29.1-alpine
     container_name: vaultwarden
@@ -91,7 +88,6 @@ services:
       TZ: "Etc/UTC"
     volumes:
       - /opt/docker/vaultwarden/data:/data
-
   vaultwarden-db:
     image: postgres:15.4-alpine3.18
     container_name: vaultwarden-db
@@ -102,11 +98,10 @@ services:
       POSTGRES_PASSWORD: DB_PASSWORD # pragma: allowlist secret
     volumes:
       - /opt/docker/vaultwarden/db/data:/var/lib/postgresql/data
-
 networks:
   default:
     driver: bridge
     ipam:
       driver: default
       config:
-      - subnet: 172.20.0.1/16
+        - subnet: 172.20.0.1/16
