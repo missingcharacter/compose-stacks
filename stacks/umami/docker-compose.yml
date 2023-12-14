@@ -2,7 +2,7 @@
 version: '3'
 services:
   traefik:
-    image: traefik:v2.10.7
+    image: traefik:v2.10.7@sha256:c5181ddf303f1ccfd4bd6d1d9c4867b0500efb6089a0f9ccb16612438f6e934f
     container_name: "traefik"
     command:
       #- "--log.level=DEBUG"
@@ -27,7 +27,7 @@ services:
       - /var/run/docker.sock:/var/run/docker.sock:ro
     restart: always
   umami:
-    image: ghcr.io/umami-software/umami:postgresql-v2.5.0
+    image: ghcr.io/umami-software/umami:postgresql-v2.5.0@sha256:59acdba71970aa1b8219003aa616dc0ec886a8eed241e546dbec841653c1bec0
     container_name: "umami"
     labels:
       - "traefik.enable=true"
@@ -43,7 +43,7 @@ services:
     restart: always
     init: true
   db:
-    image: postgres:16.1-alpine3.18
+    image: postgres:16.1-alpine3.18@sha256:c9d6afcf22c5b007caf282a59aba463838aa1bf5c4511682c1f07cb6c54e8376
     environment:
       POSTGRES_DB: umami
       POSTGRES_USER: umami

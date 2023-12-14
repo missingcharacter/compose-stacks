@@ -2,7 +2,7 @@
 version: "3"
 services:
   traefik:
-    image: traefik:v2.10.7
+    image: traefik:v2.10.7@sha256:c5181ddf303f1ccfd4bd6d1d9c4867b0500efb6089a0f9ccb16612438f6e934f
     container_name: traefik
     command:
       #- "--log.level=DEBUG"
@@ -23,7 +23,7 @@ services:
       - /var/run/docker.sock:/var/run/docker.sock:ro
       - /opt/docker/vaultwarden/le:/letsencrypt
   waf:
-    image: owasp/modsecurity-crs:3.3.5-apache-202308071108
+    image: owasp/modsecurity-crs:3.3.5-apache-202308071108@sha256:852cfe916f97adbec275e7f379dbc0e774a97d172b6b6d7efa6722d5e0907b92
     container_name: waf
     environment:
       PARANOIA: 1
@@ -63,7 +63,7 @@ services:
       - "traefik.http.routers.vw-websocket-http.service=vw-websocket"
       - "traefik.http.services.vw-websocket.loadbalancer.server.port=3012"
   vaultwarden:
-    image: vaultwarden/server:1.30.1-alpine
+    image: vaultwarden/server:1.30.1-alpine@sha256:f68ffb194610ddbe5b8e01cdff9a0da2093d70f82e837e1bdc62bc99b076d6ab
     container_name: vaultwarden
     restart: unless-stopped
     environment:
@@ -89,7 +89,7 @@ services:
     volumes:
       - /opt/docker/vaultwarden/data:/data
   vaultwarden-db:
-    image: postgres:16.1-alpine3.18
+    image: postgres:16.1-alpine3.18@sha256:c9d6afcf22c5b007caf282a59aba463838aa1bf5c4511682c1f07cb6c54e8376
     container_name: vaultwarden-db
     restart: unless-stopped
     environment:
