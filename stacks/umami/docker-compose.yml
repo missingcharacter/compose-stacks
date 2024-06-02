@@ -2,7 +2,7 @@
 version: '3'
 services:
   traefik:
-    image: traefik:v2.10.7
+    image: traefik:v3.0.1
     container_name: "traefik"
     command:
       #- "--log.level=DEBUG"
@@ -43,7 +43,7 @@ services:
     restart: always
     init: true
   db:
-    image: postgres:16.1-alpine3.18
+    image: postgres:16.3-alpine3.18
     environment:
       POSTGRES_DB: umami
       POSTGRES_USER: umami
