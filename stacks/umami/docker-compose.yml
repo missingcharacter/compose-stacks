@@ -2,7 +2,7 @@
 version: '3'
 services:
   traefik:
-    image: traefik:v3.0.1
+    image: traefik:3.0.4
     container_name: "traefik"
     command:
       #- "--log.level=DEBUG"
@@ -27,7 +27,7 @@ services:
       - /var/run/docker.sock:/var/run/docker.sock:ro
     restart: always
   umami:
-    image: ghcr.io/umami-software/umami:postgresql-v2.5.0
+    image: ghcr.io/umami-software/umami:postgresql-v2.12.1
     container_name: "umami"
     labels:
       - "traefik.enable=true"
@@ -43,7 +43,7 @@ services:
     restart: always
     init: true
   db:
-    image: postgres:16.3-alpine3.18
+    image: postgres:16.3-alpine3.20
     environment:
       POSTGRES_DB: umami
       POSTGRES_USER: umami

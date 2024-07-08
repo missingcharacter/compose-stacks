@@ -2,7 +2,7 @@
 version: "3"
 services:
   traefik:
-    image: traefik:v3.0.1
+    image: traefik:3.0.4
     container_name: traefik
     command:
       #- "--log.level=DEBUG"
@@ -23,10 +23,11 @@ services:
       - /var/run/docker.sock:/var/run/docker.sock:ro
       - /opt/docker/vaultwarden/le:/letsencrypt
   waf:
-    image: owasp/modsecurity-crs:3.3.5-apache-202308071108
+    image: owasp/modsecurity-crs:4.3.0-apache-202406090906
     container_name: waf
     environment:
-      PARANOIA: 1
+      PORT: 8080
+      BLOCKING_PARANOIA: 1
       ANOMALY_INBOUND: 10
       ANOMALY_OUTBOUND: 5
       PROXY: 1
@@ -51,7 +52,7 @@ services:
       - "traefik.http.routers.vw-ui-http.entrypoints=web"
       - "traefik.http.routers.vw-ui-http.middlewares=redirect-https"
       - "traefik.http.routers.vw-ui-http.service=vw-ui"
-      - "traefik.http.services.vw-ui.loadbalancer.server.port=80"
+      - "traefik.http.services.vw-ui.loadbalancer.server.port=8080"
       - "traefik.http.routers.vw-websocket-https.rule=Host(`sub.domain.tld`) && Path(`/notifications/hub`)"
       - "traefik.http.routers.vw-websocket-https.entrypoints=websecure"
       - "traefik.http.routers.vw-websocket-https.tls=true"
@@ -89,7 +90,7 @@ services:
     volumes:
       - /opt/docker/vaultwarden/data:/data
   vaultwarden-db:
-    image: postgres:16.3-alpine3.18
+    image: postgres:16.3-alpine3.20
     container_name: vaultwarden-db
     restart: unless-stopped
     environment:
