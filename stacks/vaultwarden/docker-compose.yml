@@ -2,7 +2,7 @@
 version: "3"
 services:
   traefik:
-    image: traefik:3.0.4
+    image: traefik:v3.1.4
     container_name: traefik
     command:
       #- "--log.level=DEBUG"
@@ -64,7 +64,7 @@ services:
       - "traefik.http.routers.vw-websocket-http.service=vw-websocket"
       - "traefik.http.services.vw-websocket.loadbalancer.server.port=3012"
   vaultwarden:
-    image: vaultwarden/server:1.30.5-alpine
+    image: vaultwarden/server:1.32.0-alpine
     container_name: vaultwarden
     restart: unless-stopped
     environment:
@@ -90,7 +90,7 @@ services:
     volumes:
       - /opt/docker/vaultwarden/data:/data
   vaultwarden-db:
-    image: postgres:16.3-alpine3.20
+    image: postgres:16.4-alpine3.20
     container_name: vaultwarden-db
     restart: unless-stopped
     environment:
