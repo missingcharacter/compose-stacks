@@ -132,3 +132,84 @@ maxretry = 3
 bantime = 14400
 findtime = 14400
 ```
+
+## Upgrade PostgreSQL
+
+### Example 16.4 to 17
+
+**Note:** Assumes the machine has enough space for the backup
+
+- Backup existing database
+
+  ```shell
+  sudo docker exec vaultwarden-db pg_dumpall -U vaultwarden > ./dump16.4.sql
+  ```
+
+- Stop all docker compose services
+
+  ```shell
+  sudo systemctl stop docker-compose@vaultwarden
+  ```
+
+- Rename existing PostgreSQL data folder
+
+  ```shell
+  sudo mv /opt/docker/vaultwarden/db/data /opt/docker/vaultwarden/db/data16.4
+  ```
+
+- Create new PostgreSQL data folder
+
+  ```shell
+  sudo mkdir /opt/docker/vaultwarden/db/data
+  ```
+
+- Comment all services except PostgreSQL and mount `/path/to/dump16.4.sql` as
+  as `/tmp/dump.sql` in `docker-compose.yml`
+
+  ```shell
+  sudo -e /etc/docker/compose/vaultwarden/docker-compose.yml
+  ```
+
+  ```yaml
+      volumes:
+        - /opt/docker/vaultwarden/db/data:/var/lib/postgresql/data
+        - /path/to/dump16.4.sql:/tmp/dump.sql:ro
+  ```
+
+- Start only PostgreSQL container
+
+  ```shell
+  sudo systemctl start docker-compose@vaultwarden
+  ```
+
+- Import backup
+
+  ```shell
+  sudo docker exec -it vaultwarden-db bash
+  psql -U vaultwarden -d vaultwarden < /tmp/dump.sql
+  ```
+
+- Stop PostgreSQL container
+
+  ```shell
+  sudo systemctl stop docker-compose@vaultwarden
+  ```
+
+- Remove comments from services and comment mount `/path/to/dump16.4.sql` in
+  `docker-compose.yml`
+
+  ```shell
+  sudo -e /etc/docker/compose/vaultwarden/docker-compose.yml
+  ```
+
+  ```yaml
+      volumes:
+        - /opt/docker/vaultwarden/db/data:/var/lib/postgresql/data
+        #- /path/to/dump16.4.sql:/tmp/dump.sql:ro
+  ```
+
+- Start all docker compose services
+
+  ```shell
+  sudo systemctl start docker-compose@vaultwarden
+  ```
