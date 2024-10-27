@@ -139,6 +139,18 @@ findtime = 14400
 
 **Note:** Assumes the machine has enough space for the backup
 
+- Comment all services except PostgreSQL
+
+  ```shell
+  sudo -e /etc/docker/compose/vaultwarden/docker-compose.yml
+  ```
+
+- Stop all docker compose services and start only PostgreSQL container
+
+  ```shell
+  sudo systemctl restart docker-compose@vaultwarden
+  ```
+
 - Backup existing database
 
   ```shell
@@ -163,8 +175,8 @@ findtime = 14400
   sudo mkdir /opt/docker/vaultwarden/db/data
   ```
 
-- Comment all services except PostgreSQL and mount `/path/to/dump16.4.sql` as
-  as `/tmp/dump.sql` in `docker-compose.yml`
+- Mount `/path/to/dump16.4.sql` as `/tmp/dump.sql` in `docker-compose.yml` and
+  upgrade PostgreSQL tag to version `17`
 
   ```shell
   sudo -e /etc/docker/compose/vaultwarden/docker-compose.yml
@@ -179,7 +191,7 @@ findtime = 14400
 - Start only PostgreSQL container
 
   ```shell
-  sudo systemctl start docker-compose@vaultwarden
+  sudo systemctl restart docker-compose@vaultwarden
   ```
 
 - Import backup
@@ -187,12 +199,6 @@ findtime = 14400
   ```shell
   sudo docker exec -it vaultwarden-db bash
   psql -U vaultwarden -d vaultwarden < /tmp/dump.sql
-  ```
-
-- Stop PostgreSQL container
-
-  ```shell
-  sudo systemctl stop docker-compose@vaultwarden
   ```
 
 - Remove comments from services and comment mount `/path/to/dump16.4.sql` in
@@ -211,5 +217,5 @@ findtime = 14400
 - Start all docker compose services
 
   ```shell
-  sudo systemctl start docker-compose@vaultwarden
+  sudo systemctl restart docker-compose@vaultwarden
   ```
