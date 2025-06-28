@@ -43,7 +43,7 @@ services:
     restart: always
     init: true
   db:
-    image: postgres:17.5-alpine3.20
+    image: postgres:17.5-alpine3.22
     environment:
       POSTGRES_DB: umami
       POSTGRES_USER: umami

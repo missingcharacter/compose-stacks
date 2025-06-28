@@ -90,7 +90,7 @@ services:
     volumes:
       - /opt/docker/vaultwarden/data:/data
   vaultwarden-db:
-    image: postgres:17.5-alpine3.20
+    image: postgres:17.5-alpine3.22
     container_name: vaultwarden-db
     restart: unless-stopped
     environment:
