@@ -1,8 +1,7 @@
 ---
-version: "3"
 services:
   traefik:
-    image: traefik:v3.4.3
+    image: traefik:v3.5.1
     container_name: traefik
     command:
       #- "--log.level=DEBUG"
@@ -23,13 +22,22 @@ services:
       - /var/run/docker.sock:/var/run/docker.sock:ro
       - /opt/docker/vaultwarden/le:/letsencrypt
   waf:
-    image: owasp/modsecurity-crs:4.3.0-apache-202406090906
+    image: owasp/modsecurity-crs:4.17.1-apache-alpine-202508061208
     container_name: waf
     environment:
-      PORT: 8080
+      PORT: "8080"
+      SSL_ENGINE: "off"
       BLOCKING_PARANOIA: 1
       ANOMALY_INBOUND: 10
       ANOMALY_OUTBOUND: 5
+      SERVER_NAME: "vaultwarden.ricdros.com"
+      MODSEC_STATUS_ENGINE: "on"
+      MODSEC_AUDIT_ENGINE: "on"
+      MODSEC_AUDIT_LOG: "/dev/stdout"
+      MODSEC_DEBUG_LOGLEVEL: "0"
+      MODSEC_DEBUG_LOG: "/dev/stdout"
+      LOGLEVEL: "warn"
+      ACCESSLOG: "/dev/stdout"
       PROXY: 1
       REMOTEIP_INT_PROXY: "172.20.0.1/16"
       BACKEND: "http://vaultwarden:80"
@@ -64,7 +72,7 @@ services:
       - "traefik.http.routers.vw-websocket-http.service=vw-websocket"
       - "traefik.http.services.vw-websocket.loadbalancer.server.port=3012"
   vaultwarden:
-    image: vaultwarden/server:1.34.1-alpine
+    image: vaultwarden/server:1.34.3-alpine
     container_name: vaultwarden
     restart: unless-stopped
     environment:
@@ -90,7 +98,7 @@ services:
     volumes:
       - /opt/docker/vaultwarden/data:/data
   vaultwarden-db:
-    image: postgres:17.5-alpine3.22
+    image: postgres:17.6-alpine3.22
     container_name: vaultwarden-db
     restart: unless-stopped
     environment:
@@ -98,7 +106,14 @@ services:
       POSTGRES_USER: vaultwarden
       POSTGRES_PASSWORD: DB_PASSWORD # pragma: allowlist secret
     volumes:
-      - /opt/docker/vaultwarden/db/data:/var/lib/postgresql/data
+      - /opt/docker/vaultwarden/db/data/17:/var/lib/postgresql/data
+    healthcheck:
+      test: |
+        pg_isready -d "$${POSTGRES_DB}" -U "$${POSTGRES_USER}"
+      start_period: 80s
+      interval: 30s
+      timeout: 60s
+      retries: 5
 networks:
   default:
     driver: bridge
