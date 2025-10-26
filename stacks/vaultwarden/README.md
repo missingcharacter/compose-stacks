@@ -27,12 +27,12 @@ $ echo -n '<REDACTED>' | argon2 \
   "$(openssl rand -base64 32)" -e -id -k 19456 -t 2 -p 1 | sed 's#\$#\$\$#g'
 ```
 
-More details [here](https://github.com/dani-garcia/vaultwarden/wiki/Enabling-admin-page#secure-the-admin_token)
+More details on [this page](https://github.com/dani-garcia/vaultwarden/wiki/Enabling-admin-page#secure-the-admin_token)
 
 ## `fail2ban` setup
 
 The documented `fail2ban` configuration for `vaultwarden` is
-[here](https://github.com/dani-garcia/vaultwarden/wiki/Fail2Ban-Setup#debian--ubuntu--raspberry-pi-os)
+[this](https://github.com/dani-garcia/vaultwarden/wiki/Fail2Ban-Setup#debian--ubuntu--raspberry-pi-os)
 
 Below you'll find suggestions for when the containers log to `stdout` and
 `stderr`, and `docker` is configured to log to `journald`
