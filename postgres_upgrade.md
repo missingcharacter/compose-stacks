@@ -61,7 +61,7 @@ Source:
 
    <!-- markdownlint-disable MD013 -->
    ```shell
-   $ sudo docker tail -f logs umami-db-1
+   $ sudo docker logs -f umami-db-1
    ...
    2025-10-26 17:18:33.851 UTC [1] LOG:  starting PostgreSQL 18.0 on x86_64-pc-linux-musl, compiled by gcc (Alpine 14.2.0) 14.2.0, 64-bit
    ...
