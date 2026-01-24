@@ -1,0 +1,86 @@
+---
+services:
+  caddy:
+    hostname: caddy
+    image: docker.io/caddy:2.10.2-alpine
+    restart: unless-stopped
+    ports:
+      - 80:80
+      - 443:443
+      - 443:443/udp
+      - 8008:8008
+      - 8448:8448
+      - 8448:8448/udp
+    volumes:
+      - /opt/docker/synapse/caddy/Caddyfile:/etc/caddy/Caddyfile:ro
+      - /opt/docker/synapse/caddy/data:/data
+      - /opt/docker/synapse/caddy/config:/config
+    networks:
+      - internal
+  postgres:
+    hostname: postgres
+    image: docker.io/postgres:18.0-alpine3.22
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: synapse
+      POSTGRES_USER: synapse
+      POSTGRES_INITDB_ARGS: --encoding=UTF-8 --lc-collate=C --lc-ctype=C
+    env_file:
+      - /opt/docker/synapse/postgres/runtime.env
+    # `postgres` container starts as root but switches to user `postgres`
+    # with `uid` and `gid` number 70
+    # $ sudo docker run --rm -it --entrypoint bash docker.io/postgres:17.6-alpine3.22
+    # ae14e6d0f571:/# grep postgres /etc/passwd
+    # postgres:x:70:70::/var/lib/postgresql:/bin/sh
+    volumes:
+      - /opt/docker/synapse/postgres/data/18/docker:/var/lib/postgresql/18/docker
+      #- /home/ricdros/dump17.sql:/tmp/dump.sql:ro
+    healthcheck:
+      test: |
+        pg_isready -d "$${POSTGRES_DB}" -U "$${POSTGRES_USER}"
+      start_period: 80s
+      interval: 30s
+      timeout: 60s
+      retries: 5
+    networks:
+      - internal
+  synapse:
+    hostname: synapse
+    image: ghcr.io/element-hq/synapse:v1.141.0
+    restart: unless-stopped
+    environment:
+      SYNAPSE_CONFIG_DIR: /config
+      SYNAPSE_CONFIG_PATH: /config/homeserver.yaml
+      UID: 991
+      GID: 991
+      TZ: UTC
+    volumes:
+      - /opt/docker/synapse/synapse/config:/config
+      - /opt/docker/synapse/synapse/data:/data
+    depends_on:
+      postgres:
+        condition: service_healthy
+    healthcheck:
+      test: |
+        curl -fSs http://localhost:8008/health || exit 1
+      start_period: 5s
+      interval: 15s
+      timeout: 5s
+      retries: 3
+    networks:
+      - internal
+  matrix-registration-bot:
+    image: moanos/matrix-registration-bot:latest
+    environment:
+      LOGGING_LEVEL: DEBUG
+      BOT_SERVER: "https://chat.yourdomain.tld"
+      BOT_USERNAME: "<BOT-USERNAME-HERE>"
+      API_BASE_URL: "https://chat.yourdomain.tld"
+    env_file:
+      - /opt/docker/synapse/matrix-registration-bot/runtime.env
+    depends_on:
+      synapse:
+        condition: service_healthy
+networks:
+  internal:
+    attachable: true

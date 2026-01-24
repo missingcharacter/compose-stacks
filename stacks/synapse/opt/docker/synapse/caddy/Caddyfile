@@ -1,0 +1,26 @@
+{
+	admin off
+	email you@yourdomain.tld
+	# acme_ca https://acme-staging-v02.api.letsencrypt.org/directory
+}
+
+http://chat.yourdomain.tld {
+	redir https://chat.yourdomain.tld{uri} permanent
+}
+
+https://chat.yourdomain.tld {
+	reverse_proxy synapse:8008
+}
+
+http://chat.yourdomain.tld:8008 {
+	redir https://chat.yourdomain.tld:8448{uri} permanent
+
+}
+
+https://chat.yourdomain.tld:8448 {
+	reverse_proxy synapse:8008
+}
+
+:9180 {
+	metrics
+}
