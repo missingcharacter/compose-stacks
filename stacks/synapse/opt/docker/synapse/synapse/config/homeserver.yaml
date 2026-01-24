@@ -1,0 +1,66 @@
+---
+# Configuration file for Synapse.
+#
+# This is a YAML file: see [1] for a quick introduction. Note in particular
+# that *indentation is important*: all the elements of a list or dictionary
+# should have the same indentation.
+#
+# [1] https://docs.ansible.com/ansible/latest/reference_appendices/YAMLSyntax.html
+#
+# For more information on how to configure Synapse, including a complete accounting of
+# each option, go to docs/usage/configuration/config_documentation.md or
+# https://element-hq.github.io/synapse/latest/usage/configuration/config_documentation.html
+server_name: "yourdomain.tld"
+pid_file: /data/homeserver.pid
+listeners:
+  - port: 8008
+    tls: false
+    type: http
+    x_forwarded: true
+    resources:
+      - names: [client, federation]
+        compress: false
+database:
+  name: psycopg2
+  args:
+    user: synapse
+    host: postgres
+    password: YOURSUPERSECUREPASSWORDHERE # pragma: allowlist secret
+    database: synapse
+log_config: "/config/chat.yourdomain.tld.log.config"
+media_store_path: /data/media_store
+registration_shared_secret: "yourregistartionsharedsecrethere" # pragma: allowlist secret
+report_stats: false
+macaroon_secret_key: "macaroonsecrethere" # pragma: allowlist secret
+form_secret: "formsecrethere" # pragma: allowlist secret
+signing_key_path: "/config/chat.yourdomain.tld.signing.key"
+suppress_key_server_warning: true
+trusted_key_servers:
+  - server_name: "chat.yourdomain.tld"
+  - server_name: "matrix.org"
+email:
+  smtp_host: mail.yourdomain.tld
+  smtp_user: synapse
+  smtp_pass: "smtppasswordhere"
+  force_tls: true
+  notif_from: "No reply <no-reply@yourdomain.tld>"
+  enable_notifs: true
+  notif_for_new_users: true
+  ## TODO reset to default (shortened for testing)
+  notif_delay_before_email: "2m"
+public_baseurl: https://chat.yourdomain.tld
+admin_contact: mailto:you@yourdomain.tld
+default_room_version: '11'
+enable_registration: true
+registrations_require_3pid:
+  - email
+disable_msisdn_registration: true
+allowed_local_3pids:
+  - medium: email
+    pattern: ^you@yourdomain\.tld$
+  - medium: email
+    pattern: ^someoneelse@theirdomain\.tld$
+# to get an access token
+# curl -XPOST -d '{"type":"m.login.password", "user":"@yourmatrixusername:yourdomain.tld","password":"XXXXXXXXX"}' https://chat.yourdomain.tld/_matrix/client/r0/login
+# accessible 443
+# vim:ft=yaml
