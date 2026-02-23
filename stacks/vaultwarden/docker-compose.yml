@@ -22,7 +22,7 @@ services:
       - /var/run/docker.sock:/var/run/docker.sock:ro
       - /opt/docker/vaultwarden/le:/letsencrypt
   waf:
-    image: owasp/modsecurity-crs:4.17.1-apache-alpine-202508061208
+    image: owasp/modsecurity-crs:4.23.0-apache-alpine-202602050102
     container_name: waf
     environment:
       PORT: "8080"
@@ -98,7 +98,7 @@ services:
     volumes:
       - /opt/docker/vaultwarden/data:/data
   vaultwarden-db:
-    image: postgres:18.2-alpine3.22
+    image: postgres:18.2-alpine3.23
     container_name: vaultwarden-db
     restart: unless-stopped
     environment:
