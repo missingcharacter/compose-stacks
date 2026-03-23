@@ -2,7 +2,7 @@
 services:
   caddy:
     hostname: caddy
-    image: docker.io/caddy:2.10.2-alpine
+    image: docker.io/caddy:2.11.2-alpine
     restart: unless-stopped
     ports:
       - 80:80
@@ -19,7 +19,7 @@ services:
       - internal
   postgres:
     hostname: postgres
-    image: docker.io/postgres:18.2-alpine3.23
+    image: docker.io/postgres:18.3-alpine3.23
     restart: unless-stopped
     environment:
       POSTGRES_DB: synapse
@@ -46,7 +46,7 @@ services:
       - internal
   synapse:
     hostname: synapse
-    image: ghcr.io/element-hq/synapse:v1.147.1
+    image: ghcr.io/element-hq/synapse:v1.149.1
     restart: unless-stopped
     environment:
       SYNAPSE_CONFIG_DIR: /config
