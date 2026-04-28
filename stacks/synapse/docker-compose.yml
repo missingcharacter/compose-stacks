@@ -46,7 +46,7 @@ services:
       - internal
   synapse:
     hostname: synapse
-    image: ghcr.io/element-hq/synapse:v1.149.1
+    image: ghcr.io/element-hq/synapse:v1.151.0
     restart: unless-stopped
     environment:
       SYNAPSE_CONFIG_DIR: /config
