@@ -2,7 +2,7 @@
 services:
   caddy:
     hostname: caddy
-    image: docker.io/caddy:2.11.3-alpine
+    image: docker.io/caddy:2.11.4-alpine
     restart: unless-stopped
     ports:
       - 80:80
@@ -46,7 +46,7 @@ services:
       - internal
   synapse:
     hostname: synapse
-    image: ghcr.io/element-hq/synapse:v1.153.0
+    image: ghcr.io/element-hq/synapse:v1.154.0
     restart: unless-stopped
     environment:
       SYNAPSE_CONFIG_DIR: /config
