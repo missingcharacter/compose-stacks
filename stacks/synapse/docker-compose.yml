@@ -19,7 +19,7 @@ services:
       - internal
   postgres:
     hostname: postgres
-    image: docker.io/postgres:18.4-alpine3.23
+    image: docker.io/postgres:18.4-alpine3.24
     restart: unless-stopped
     environment:
       POSTGRES_DB: synapse
